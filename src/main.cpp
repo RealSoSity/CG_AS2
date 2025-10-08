@@ -27,6 +27,8 @@ std::vector<Shader*> shaderList;
 
 float yaw = -90.0f, pitch = 0.0f;
 
+std::vector<unsigned int> texList;
+
 //Vertex Shader
 static const char* vShader = "Shaders/shader.vert";
 
@@ -35,7 +37,7 @@ static const char* fShader = "Shaders/shader.frag";
 
 //light Colour
 // glm::vec3 lightColour = glm::vec3(1.0f, 1.0f, 1.0f);
-glm::vec3 lightColour = glm::vec3(0.0f, 1.0f, 1.0f); //lab11 (Cyan) and ambient light strength at 30%
+glm::vec3 lightColour = glm::vec3(1.0f, 1.0f, 1.0f); //lab11 (Cyan) and ambient light strength at 30%
 
 //Light position
 glm::vec3 lightPos = glm::vec3(5.0f, 5.0f, 0.0f);
@@ -102,20 +104,77 @@ void CreateShaders()
     shaderList.push_back(shader1);
 }
 
+
+unsigned int loadTexture2D(const std::string &path){
+    int width, height, nrChannels;
+
+    unsigned char* tex = stbi_load(path.c_str(), &width, &height, &nrChannels,0);
+
+    if(!tex){
+        std::cout << "Failed to load texture " << stbi_failure_reason() << "\n";
+    }else{
+        //Handle 1/3/4 channel images correctly
+        GLenum format = GL_RGB;
+        if(nrChannels == 1) format = GL_RED;
+        else if(nrChannels == 3) format = GL_RGB;
+        else if(nrChannels == 4) format = GL_RGBA;
+
+        //Gen texture
+        unsigned int texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        //Avoid row-alignment issues for non-4 byte widths
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, tex);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(tex);
+
+        std::cout << "Loaded texture: " << path << " (" << width << "x" << height << ")\n";
+        return texture;
+    }
+}
+
 void CreateOBJ(){
-    Mesh *obj1 = new Mesh();
     // bool loaded = obj1->CreateMeshFromOBJ("Models/Test.obj");
-    bool loaded = obj1->CreateMeshFromOBJ("Models/suzanne.obj");
-    if(loaded)
-    {
-        for(int i = 0; i < 10; i++)
-        {
-            meshList.push_back(obj1);
-        }
+    // bool loaded = sea->CreateMeshFromOBJ("Models/sea.obj");
+    Mesh *sea = new Mesh();
+    Mesh *sand = new Mesh();
+
+    bool loadedSea = sea->CreateMeshFromOBJ("Models/sea.obj");
+    bool loadedSand = sand->CreateMeshFromOBJ("Models/Sea_sand.obj");
+
+    if(loadedSea){
+        texList.push_back(loadTexture2D("Textures/material_baseColor.png"));
+        meshList.push_back(sea);
     }else{
         std::cout<<"Failed to load model"<<std::endl;
     }
+    
+    if(loadedSand){
+        texList.push_back(loadTexture2D("Textures/Sand_baseColor.jpeg"));
+        meshList.push_back(sand);
+    }else{
+        std::cout<<"Failed to load model"<<std::endl;
+    }
+    // if(loaded)
+    // {
+    //     // for(int i = 0; i < 10; i++)
+    //     // {
+    //         meshList.push_back(obj1);
+    //     // }
+    // }else{
+    //     std::cout<<"Failed to load model"<<std::endl;
+    
 }
+
+
 
 int main()
 {
@@ -141,38 +200,69 @@ int main()
     
     glm::mat4 projection = glm::perspective(45.0f,(GLfloat)mainWindow.getBufferWidth()/ (GLfloat)mainWindow.getBufferHeight(),0.1f, 100.0f);
 
-    unsigned int texture1;
-    glGenTextures(1, &texture1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
+    // unsigned int texture1;
+    // glGenTextures(1, &texture1);
+    // glBindTexture(GL_TEXTURE_2D, texture1);
     
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
 
-    int width1, height1, nrChannels1;
-    int width2, height2, nrChannels2;
+    // int width1, height1, nrChannels1;
+    // int width2, height2, nrChannels2;
     // unsigned char *data1 = stbi_load("Textures/container.jpg", &width1, &height1, &nrChannels1, 0);
-    unsigned char *data1 = stbi_load("Textures/cloth.jpg", &width1, &height1, &nrChannels1, 0); //lab9
-    unsigned char *uvmap = stbi_load("Textures/uvmap.png", &width2, &height2, &nrChannels2, 0); //Lab10 (uvmap.png texture)
-    
-    if(!uvmap){
-        std::cout << "Failed to load texture" << stbi_failure_reason() << "\n";
-    }else{
-        //Handle 1/3/4 channel images correctly
-        GLenum format = GL_RGB;
-        if(nrChannels2 == 1) format = GL_RED;
-        else if(nrChannels2 == 3) format = GL_RGB;
-        else if(nrChannels2 == 4) format = GL_RGBA;
-        
-        //Avoid row-alignment issues for non-4-byte widths
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    // unsigned char *data1 = stbi_load("Textures/cloth.jpg", &width1, &height1, &nrChannels1, 0); //lab9
+    // unsigned char *uvmap = stbi_load("Textures/uvmap.png", &width2, &height2, &nrChannels2, 0); //Lab10 (uvmap.png texture)
+    // unsigned char *sea = stbi_load("Textures/Sand_baseColor.jpeg", &width1, &height1, &nrChannels1, 0);
+    // unsigned char *sand = stbi_load("Textures/material_baseColor.png", &width2, &height2, &nrChannels2, 0);
 
-        // glTexImage2D(GL_TEXTURE_2D, 0, format, width1, height1, 0, format, GL_UNSIGNED_BYTE, data1);
-        glTexImage2D(GL_TEXTURE_2D, 0, format,width2,height2, 0, format, GL_UNSIGNED_BYTE, uvmap);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        stbi_image_free(uvmap);
-    }
+    // std::string texPath[2] = {"Textures/material_baseColor.png", "Textures/Sand_baseColor.jpeg"};
+    
+    // if(!sea){
+    //     std::cout << "Failed to load texture " << stbi_failure_reason() << "\n";
+    // }else{
+    //     //Handle 1/3/4 channel images correctly
+    //     GLenum format = GL_RGB;
+    //     if(nrChannels1 == 1) format = GL_RED;
+    //     else if(nrChannels1 == 3) format = GL_RGB;
+    //     else if(nrChannels1 == 4) format = GL_RGBA;
+
+    //     //Avoid row-alignment issues for non-4 byte widths
+    //     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    //     glTexImage2D(GL_TEXTURE_2D, 0, format, width1, height1, 0, format, GL_UNSIGNED_BYTE, sea);
+    //     glGenerateMipmap(GL_TEXTURE_2D);
+    //     stbi_image_free(sea);
+    // }
+    // if(!sand){
+    //     std::cout << "Failed to load texture " << stbi_failure_reason() << "\n";
+    // }else{
+    //     //Handle 1/3/4 channel images correctly
+    //     GLenum format = GL_RGB;
+    //     if(nrChannels2 == 1) format = GL_RED;
+    //     else if(nrChannels2 == 3) format = GL_RGB;
+    //     else if(nrChannels2 == 4) format = GL_RGBA;
+
+    //     //Avoid row-alignment issues for non-4 byte widths
+    //     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    //     glTexImage2D(GL_TEXTURE_2D, 0, format, width2, height2, 0, format, GL_UNSIGNED_BYTE, sand);
+    //     glGenerateMipmap(GL_TEXTURE_2D);
+    //     stbi_image_free(sand);
+    // }
+    // if(!uvmap){
+    //     std::cout << "Failed to load texture" << stbi_failure_reason() << "\n";
+    // }else{
+    //     //Handle 1/3/4 channel images correctly
+    //     GLenum format = GL_RGB;
+    //     if(nrChannels2 == 1) format = GL_RED;
+    //     else if(nrChannels2 == 3) format = GL_RGB;
+    //     else if(nrChannels2 == 4) format = GL_RGBA;
+        
+    //     //Avoid row-alignment issues for non-4-byte widths
+    //     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    //     // glTexImage2D(GL_TEXTURE_2D, 0, format, width1, height1, 0, format, GL_UNSIGNED_BYTE, data1);
+    //     glTexImage2D(GL_TEXTURE_2D, 0, format,width2,height2, 0, format, GL_UNSIGNED_BYTE, uvmap);
+    //     glGenerateMipmap(GL_TEXTURE_2D);
+    //     stbi_image_free(uvmap);
+    // }
 
     
     //Loop until window closed
@@ -261,13 +351,13 @@ int main()
         glUniform3fv(shaderList[0]->GetUniformLocation("viewPos"), 1, (GLfloat *)&cameraPos);
         
         //Object
-        for(int i = 0; i < 10; i++){
+        for(int i = 0; i < meshList.size(); i++){
             glm::mat4 model (1.0f);
             
             
-            model = glm::translate(model, pyramidPositions[i]);
-            model = glm::rotate(model, glm::radians(2.0f * i) ,glm::vec3(1.0f, 0.3f, 0.5f));
-            model = glm::scale(model, glm::vec3(0.8f, 0.8f, 1.0f));
+        //     model = glm::translate(model, pyramidPositions[i]);
+        //     model = glm::rotate(model, glm::radians(2.0f * i) ,glm::vec3(1.0f, 0.3f, 0.5f));
+            model = glm::scale(model, glm::vec3(0.01f));
             
             glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
             glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
@@ -279,7 +369,7 @@ int main()
             
             
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, texture1);
+            glBindTexture(GL_TEXTURE_2D, texList[i]);
             
             
             meshList[i]->RenderMesh();
