@@ -36,11 +36,10 @@ static const char* vShader = "Shaders/shader.vert";
 static const char* fShader = "Shaders/shader.frag";
 
 //light Colour
-// glm::vec3 lightColour = glm::vec3(1.0f, 1.0f, 1.0f);
-glm::vec3 lightColour = glm::vec3(1.0f, 1.0f, 1.0f); //lab11 (Cyan) and ambient light strength at 30%
+glm::vec3 lightColour = glm::vec3(1.0, 1.0, 0.9); 
 
 //Light position
-glm::vec3 lightPos = glm::vec3(5.0f, 5.0f, 0.0f);
+glm::vec3 lightPos = glm::vec3(-0.2, 3.0, -0.2);
 
 void CreateTriangle()
 {
@@ -106,6 +105,9 @@ void CreateShaders()
 
 
 unsigned int loadTexture2D(const std::string &path){
+
+    stbi_set_flip_vertically_on_load(true);
+
     int width, height, nrChannels;
 
     unsigned char* tex = stbi_load(path.c_str(), &width, &height, &nrChannels,0);
@@ -124,6 +126,9 @@ unsigned int loadTexture2D(const std::string &path){
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
 
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         //Avoid row-alignment issues for non-4 byte widths
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, tex);
@@ -136,7 +141,6 @@ unsigned int loadTexture2D(const std::string &path){
 
         stbi_image_free(tex);
 
-        std::cout << "Loaded texture: " << path << " (" << width << "x" << height << ")\n";
         return texture;
     }
 }
@@ -146,9 +150,17 @@ void CreateOBJ(){
     // bool loaded = sea->CreateMeshFromOBJ("Models/sea.obj");
     Mesh *sea = new Mesh();
     Mesh *sand = new Mesh();
+    Mesh *envBase = new Mesh();
+    Mesh *fortress = new Mesh();
+    Mesh *fortress1 = new Mesh();
+    Mesh *sky = new Mesh();
 
     bool loadedSea = sea->CreateMeshFromOBJ("Models/sea.obj");
     bool loadedSand = sand->CreateMeshFromOBJ("Models/Sea_sand.obj");
+    bool loadedEnvBase = envBase->CreateMeshFromOBJ("Models/EnvironmentBase.obj");
+    bool loadedFortress = fortress->CreateMeshFromOBJ("Models/Fortress.obj");
+    bool loadedFortress1 = fortress1->CreateMeshFromOBJ("Models/Fortress1.obj");
+    bool loadedSky = sky->CreateMeshFromOBJ("Models/sky.obj");
 
     if(loadedSea){
         texList.push_back(loadTexture2D("Textures/material_baseColor.png"));
@@ -160,6 +172,34 @@ void CreateOBJ(){
     if(loadedSand){
         texList.push_back(loadTexture2D("Textures/Sand_baseColor.jpeg"));
         meshList.push_back(sand);
+    }else{
+        std::cout<<"Failed to load model"<<std::endl;
+    }
+    
+    if(envBase){
+        texList.push_back(loadTexture2D("Textures/Environment_baseColor.png"));
+        meshList.push_back(envBase);
+    }else{
+        std::cout<<"Failed to load model"<<std::endl;
+    }
+    
+    if(fortress){
+        texList.push_back(loadTexture2D("Textures/Fortress_baseColor.png"));
+        meshList.push_back(fortress);
+    }else{
+        std::cout<<"Failed to load model"<<std::endl;
+    }
+    
+    if(fortress1){
+        texList.push_back(loadTexture2D("Textures/Fortress_baseColor.png"));
+        meshList.push_back(fortress1);
+    }else{
+        std::cout<<"Failed to load model"<<std::endl;
+    }
+    
+    if(sky){
+        texList.push_back(loadTexture2D("Textures/material_5_baseColor.jpeg"));
+        meshList.push_back(sky);
     }else{
         std::cout<<"Failed to load model"<<std::endl;
     }
@@ -180,6 +220,7 @@ int main()
 {
     mainWindow = Window(WIDTH, HEIGHT, 3, 3);
     mainWindow.initialise();
+
     
     CreateOBJ();
     CreateShaders();
@@ -199,13 +240,13 @@ int main()
     GLuint uniformModel = 0, uniformProjection = 0, uniformView = 0;
     
     glm::mat4 projection = glm::perspective(45.0f,(GLfloat)mainWindow.getBufferWidth()/ (GLfloat)mainWindow.getBufferHeight(),0.1f, 100.0f);
-
+    
     // unsigned int texture1;
     // glGenTextures(1, &texture1);
     // glBindTexture(GL_TEXTURE_2D, texture1);
     
     
-
+    
     // int width1, height1, nrChannels1;
     // int width2, height2, nrChannels2;
     // unsigned char *data1 = stbi_load("Textures/container.jpg", &width1, &height1, &nrChannels1, 0);
