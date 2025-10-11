@@ -19,7 +19,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <Libs/stb_image.h>
 
-const GLint WIDTH = 1600, HEIGHT = 1200;
+const GLint WIDTH = 800, HEIGHT = 600;
 
 Window mainWindow;
 std::vector<Mesh *> meshList;
