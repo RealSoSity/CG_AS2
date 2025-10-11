@@ -12,14 +12,14 @@ uniform vec3 viewPos;
 
 uniform sampler2D texture1;
 
-vec3 ambientLight()
+vec3 ambientLight(float intensity)
 {
     float ambientStrength = 0.08f;
-    vec3 ambient = lightColour * ambientStrength;
+    vec3 ambient = (lightColour * intensity) * ambientStrength;
     return ambient;
 }
 
-vec3 diffuseLight()
+vec3 diffuseLight(float intensity)
 {
     float diffuseStrength = 1.0f;
 
@@ -27,13 +27,13 @@ vec3 diffuseLight()
     vec3 norm = normalize(Normal);
 
     float diff = max(dot(norm, lightDir), 0.0f);
-    vec3 diffuse = lightColour * diff * diffuseStrength;
+    vec3 diffuse = (lightColour * intensity) * diff * diffuseStrength;
     return diffuse;
 }
 
-vec3 specularLight()
+vec3 specularLight(float intensity)
 {
-    float specularStrength = 0.2f;
+    float specularStrength = 0.5f;
     float shininess = 64.0f;
 
     vec3 lightDir = normalize(lightPos - FragPos);
@@ -43,11 +43,12 @@ vec3 specularLight()
 
     float spec = pow(max(dot(viewDir, reflectDir), 0.0f), shininess);
     
-    vec3 specular = lightColour * spec * specularStrength;
+    vec3 specular = (lightColour * intensity) * spec * specularStrength;
     return specular;
 }
 
 void main()
 {
-    colour = texture(texture1, TextCoord) * vec4(ambientLight() + diffuseLight() + specularLight(), 1.0); 
+    float intensity = 1.5f;
+    colour = texture(texture1, TextCoord) * vec4(ambientLight(intensity) + diffuseLight(intensity) + specularLight(intensity), 1.0); 
 }
