@@ -46,7 +46,7 @@ glm::vec3 lightColour = glm::vec3(1.0f, 0.75f, 0.4f); // Sunset warm tone
 // glm::vec3 lightColour = glm::vec3(1.0, 1.0, 0.9);
 
 // Light position
-glm::vec3 lightPos = glm::vec3(2.5, 6.0, -2.5);
+glm::vec3 lightPos = glm::vec3(-5.5f, -0.25f, -4.5f);
 
 Mesh *sun;
 
@@ -499,7 +499,7 @@ int main()
 
         glm::mat4 model (1.0f);
         model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+        model = glm::scale(model, glm::vec3(0.7f, 0.7f, 0.7f));
 
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
