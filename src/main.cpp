@@ -46,7 +46,7 @@ glm::vec3 lightColour = glm::vec3(1.0f, 0.75f, 0.4f); // Sunset warm tone
 // glm::vec3 lightColour = glm::vec3(1.0, 1.0, 0.9);
 
 // Light position
-glm::vec3 lightPos = glm::vec3(-2.5, 6.0, -1.5);
+glm::vec3 lightPos = glm::vec3(2.5, 6.0, -2.5);
 
 Mesh *sun;
 
