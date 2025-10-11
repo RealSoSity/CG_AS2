@@ -14,14 +14,14 @@ uniform sampler2D texture1;
 
 vec3 ambientLight()
 {
-    float ambientStrength = 0.5f;
+    float ambientStrength = 0.08f;
     vec3 ambient = lightColour * ambientStrength;
     return ambient;
 }
 
 vec3 diffuseLight()
 {
-    float diffuseStrength = 0.5f;
+    float diffuseStrength = 1.0f;
 
     vec3 lightDir = normalize(lightPos - FragPos);
     vec3 norm = normalize(Normal);
@@ -33,7 +33,7 @@ vec3 diffuseLight()
 
 vec3 specularLight()
 {
-    float specularStrength = 0.8f;
+    float specularStrength = 0.2f;
     float shininess = 64.0f;
 
     vec3 lightDir = normalize(lightPos - FragPos);

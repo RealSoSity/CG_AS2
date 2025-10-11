@@ -35,12 +35,20 @@ static const char *vShader = "Shaders/shader.vert";
 // Fragment Shader
 static const char *fShader = "Shaders/shader.frag";
 
+//light shader
+static const char *lightVShader = "Shaders/lightShader.vert";
+static const char *lightFShader = "Shaders/lightShader.frag";
+
+GLuint uniformModel = 0, uniformProjection = 0, uniformView = 0;
+
 // light Colour
-glm::vec3 lightColour = glm::vec3(1.0f, 0.8f, 0.7f); // Sunset warm tone
+glm::vec3 lightColour = glm::vec3(1.0f, 0.75f, 0.4f); // Sunset warm tone
 // glm::vec3 lightColour = glm::vec3(1.0, 1.0, 0.9);
 
 // Light position
-glm::vec3 lightPos = glm::vec3(-0.2, 3.0, -0.2);
+glm::vec3 lightPos = glm::vec3(-2.5, 6.0, -1.5);
+
+Mesh *sun;
 
 void CreateTriangle()
 {
@@ -104,6 +112,10 @@ void CreateShaders()
     Shader *shader1 = new Shader();
     shader1->CreateFromFiles(vShader, fShader);
     shaderList.push_back(shader1);
+
+    Shader *shader2 = new Shader();
+    shader2->CreateFromFiles(lightVShader, lightFShader);
+    shaderList.push_back(shader2);
 }
 
 unsigned int loadTexture2D(const std::string &path)
@@ -188,6 +200,7 @@ void CreateOBJ()
     else
     {
         std::cout << "Failed to load model" << std::endl;
+        delete(sea);
     }
 
     if (loadedSand)
@@ -199,6 +212,7 @@ void CreateOBJ()
     else
     {
         std::cout << "Failed to load model" << std::endl;
+        delete(sand);
     }
 
     if (envBase)
@@ -210,6 +224,7 @@ void CreateOBJ()
     else
     {
         std::cout << "Failed to load model" << std::endl;
+        delete(envBase);
     }
 
     if (fortress)
@@ -221,6 +236,7 @@ void CreateOBJ()
     else
     {
         std::cout << "Failed to load model" << std::endl;
+        delete(fortress);
     }
 
     if (fortress1)
@@ -232,6 +248,7 @@ void CreateOBJ()
     else
     {
         std::cout << "Failed to load model" << std::endl;
+        delete(fortress1);
     }
     if (fortress2)
     {
@@ -242,6 +259,7 @@ void CreateOBJ()
     else
     {
         std::cout << "Failed to load model" << std::endl;
+        delete(fortress2);
     }
     if (whale)
     {
@@ -252,6 +270,7 @@ void CreateOBJ()
     else
     {
         std::cout << "Failed to load model" << std::endl;
+        delete(whale);
     }
     if (human)
     {
@@ -262,6 +281,7 @@ void CreateOBJ()
     else
     {
         std::cout << "Failed to load model" << std::endl;
+        delete(human);
     }
     if (sky)
     {
@@ -272,15 +292,38 @@ void CreateOBJ()
     else
     {
         std::cout << "Failed to load model" << std::endl;
+        delete(sky);
     }
-    // if(loaded)
-    // {
-    //     // for(int i = 0; i < 10; i++)
-    //     // {
-    //         meshList.push_back(obj1);
-    //     // }
-    // }else{
-    //     std::cout<<"Failed to load model"<<std::endl;
+    
+    sun = new Mesh();
+    bool sunLoaded = sun->CreateMeshFromOBJ("Models/sphere.obj");
+    if(!sunLoaded)
+    {
+        std::cout << "Failed to load model" << std::endl;
+        delete(sun);
+    }
+    
+}
+
+void renderScene(glm::mat4 view, glm::mat4 projection)
+{
+    // Object
+    for (int i = 0; i < meshList.size(); i++)
+    {
+        glm::mat4 model(1.0f);
+        model = glm::translate(model, meshPositions[i]);
+        //     model = glm::translate(model, pyramidPositions[i]);
+        //     model = glm::rotate(model, glm::radians(2.0f * i) ,glm::vec3(1.0f, 0.3f, 0.5f));
+        model = glm::scale(model, glm::vec3(0.01f));
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
+        GLint unitformTexture1 = shaderList[0]->GetUniformLocation("texture1");
+        glUniform1i(unitformTexture1, 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texList[i]);
+        meshList[i]->RenderMesh();
+    }
 }
 
 int main()
@@ -302,8 +345,6 @@ int main()
     glm::vec3 cameraDirection = glm::normalize(cameraTarget - cameraPos);
     glm::vec3 cameraRight = glm::normalize(glm::cross(cameraDirection, up));
     glm::vec3 cameraUp = glm::normalize(glm::cross(cameraRight, cameraDirection));
-
-    GLuint uniformModel = 0, uniformProjection = 0, uniformView = 0;
 
     glm::mat4 projection = glm::perspective(45.0f, (GLfloat)mainWindow.getBufferWidth() / (GLfloat)mainWindow.getBufferHeight(), 0.1f, 100.0f);
 
@@ -410,12 +451,6 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // draw here
-        shaderList[0]->UseShader();
-        uniformModel = shaderList[0]->GetUniformLocation("model");
-        uniformProjection = shaderList[0]->GetUniformLocation("projection");
-        uniformView = shaderList[0]->GetUniformLocation("view");
-
         glm::mat4 view(1.0f);
 
         glm::mat4 cameraPosMat(1.0f);
@@ -428,56 +463,51 @@ int main()
         cameraRotateMat[0] = glm::vec4(cameraRight.x, cameraUp.x, -cameraDirection.x, 0.0f);
         cameraRotateMat[1] = glm::vec4(cameraRight.y, cameraUp.y, -cameraDirection.y, 0.0f);
         cameraRotateMat[2] = glm::vec4(cameraRight.z, cameraUp.z, -cameraDirection.z, 0.0f);
-
         // view = cameraRotateMat * cameraPosMat;
-
         view = glm::lookAt(cameraPos, cameraPos + cameraDirection, cameraUp);
 
-        glm::vec3 pyramidPositions[] =
-            {
-                glm::vec3(0.0f, 0.0f, -2.5f),
-                glm::vec3(2.0f, 5.0f, -15.0f),
-                glm::vec3(-1.5f, -2.2f, -2.5f),
-                glm::vec3(-3.8f, -2.0f, -12.3f),
-                glm::vec3(2.4f, -0.4f, -3.5f),
-                glm::vec3(-1.7f, 3.0f, -7.5f),
-                glm::vec3(1.3f, -2.0f, -2.5f),
-                glm::vec3(1.5f, 2.0f, -2.5f),
-                glm::vec3(1.5f, 0.2f, -1.5f),
-                glm::vec3(-1.3f, 1.0f, -1.5f)};
+        // glm::vec3 pyramidPositions[] =
+        //     {
+        //         glm::vec3(0.0f, 0.0f, -2.5f),
+        //         glm::vec3(2.0f, 5.0f, -15.0f),
+        //         glm::vec3(-1.5f, -2.2f, -2.5f),
+        //         glm::vec3(-3.8f, -2.0f, -12.3f),
+        //         glm::vec3(2.4f, -0.4f, -3.5f),
+        //         glm::vec3(-1.7f, 3.0f, -7.5f),
+        //         glm::vec3(1.3f, -2.0f, -2.5f),
+        //         glm::vec3(1.5f, 2.0f, -2.5f),
+        //         glm::vec3(1.5f, 0.2f, -1.5f),
+        //         glm::vec3(-1.3f, 1.0f, -1.5f)};
 
-        // light Colour
+        // draw here
+        shaderList[0]->UseShader();
+        uniformModel = shaderList[0]->GetUniformLocation("model");
+        uniformProjection = shaderList[0]->GetUniformLocation("projection");
+        uniformView = shaderList[0]->GetUniformLocation("view");
+        renderScene(view, projection);
+
+        //light        
         glUniform3fv(shaderList[0]->GetUniformLocation("lightColour"), 1, (GLfloat *)&lightColour);
-
-        // Light Position
         glUniform3fv(shaderList[0]->GetUniformLocation("lightPos"), 1, (GLfloat *)&lightPos);
-
-        // View Position
         glUniform3fv(shaderList[0]->GetUniformLocation("viewPos"), 1, (GLfloat *)&cameraPos);
 
-        // Object
-        for (int i = 0; i < meshList.size(); i++)
-        {
-            glm::mat4 model(1.0f);
+        //light
+        shaderList[1]->UseShader();
+        uniformModel = shaderList[1]->GetUniformLocation("model");
+        uniformView = shaderList[1]->GetUniformLocation("view");
+        uniformProjection = shaderList[1]->GetUniformLocation("projection");
 
-            model = glm::translate(model, meshPositions[i]);
-            //     model = glm::translate(model, pyramidPositions[i]);
-            //     model = glm::rotate(model, glm::radians(2.0f * i) ,glm::vec3(1.0f, 0.3f, 0.5f));
-            model = glm::scale(model, glm::vec3(0.01f));
+        glm::mat4 model (1.0f);
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-            glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
-            glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 
-            GLint unitformTexture1 = shaderList[0]->GetUniformLocation("texture1");
-
-            glUniform1i(unitformTexture1, 0);
-
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, texList[i]);
-
-            meshList[i]->RenderMesh();
-        }
+        //light colour
+        glUniform3fv(shaderList[1]->GetUniformLocation("lightColour"), 1, (GLfloat *) &lightColour);
+        sun->RenderMesh();
 
         glUseProgram(0);
         // end draw
