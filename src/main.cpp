@@ -19,7 +19,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <Libs/stb_image.h>
 
-const GLint WIDTH = 800, HEIGHT = 600;
+const GLint WIDTH = 1600, HEIGHT = 1200;
 
 Window mainWindow;
 std::vector<Mesh *> meshList;
@@ -166,6 +166,8 @@ void CreateOBJ()
     Mesh *fortress1 = new Mesh();
     Mesh *fortress2 = new Mesh();
     Mesh *sky = new Mesh();
+    Mesh *human = new Mesh();
+    Mesh *whale = new Mesh();
 
     bool loadedSea = sea->CreateMeshFromOBJ("Models/sea.obj");
     bool loadedSand = sand->CreateMeshFromOBJ("Models/Sea_sand.obj");
@@ -174,6 +176,8 @@ void CreateOBJ()
     bool loadedFortress1 = fortress1->CreateMeshFromOBJ("Models/Fortress1.obj");
     bool loadedFortress2 = fortress2->CreateMeshFromOBJ("Models/Fortress2.obj");
     bool loadedSky = sky->CreateMeshFromOBJ("Models/sky.obj");
+    bool loadedHuman = human->CreateMeshFromOBJ("Models/Human.obj");
+    bool loadedWhale = whale->CreateMeshFromOBJ("Models/Whale.obj");
 
     if (loadedSea)
     {
@@ -234,6 +238,26 @@ void CreateOBJ()
         texList.push_back(loadTexture2D("Textures/Fortress_baseColor.png"));
         meshList.push_back(fortress2);
         meshPositions.push_back(glm::vec3(0.0f, 0.2f, 0.0f));
+    }
+    else
+    {
+        std::cout << "Failed to load model" << std::endl;
+    }
+    if (whale)
+    {
+        texList.push_back(loadTexture2D("Textures/whale.png"));
+        meshList.push_back(whale);
+        meshPositions.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+    }
+    else
+    {
+        std::cout << "Failed to load model" << std::endl;
+    }
+    if (human)
+    {
+        texList.push_back(loadTexture2D("Textures/human.jpeg"));
+        meshList.push_back(human);
+        meshPositions.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
     }
     else
     {
