@@ -43,7 +43,6 @@ GLuint uniformModel = 0, uniformProjection = 0, uniformView = 0;
 
 // light Colour
 glm::vec3 lightColour = glm::vec3(1.0f, 0.75f, 0.4f); // Sunset warm tone
-// glm::vec3 lightColour = glm::vec3(1.0, 1.0, 0.9);
 
 // Light position
 glm::vec3 lightPos = glm::vec3(-5.5f, -0.25f, -4.5f);
@@ -169,8 +168,6 @@ std::vector<glm::vec3> meshPositions;
 
 void CreateOBJ()
 {
-    // bool loaded = obj1->CreateMeshFromOBJ("Models/Test.obj");
-    // bool loaded = sea->CreateMeshFromOBJ("Models/sea.obj");
     Mesh *sea = new Mesh();
     Mesh *sand = new Mesh();
     Mesh *envBase = new Mesh();
@@ -312,8 +309,7 @@ void renderScene(glm::mat4 view, glm::mat4 projection)
     {
         glm::mat4 model(1.0f);
         model = glm::translate(model, meshPositions[i]);
-        //     model = glm::translate(model, pyramidPositions[i]);
-        //     model = glm::rotate(model, glm::radians(2.0f * i) ,glm::vec3(1.0f, 0.3f, 0.5f));
+
         model = glm::scale(model, glm::vec3(0.01f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
