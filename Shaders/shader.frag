@@ -49,6 +49,6 @@ vec3 specularLight(float intensity)
 
 void main()
 {
-    float intensity = 2.0f;
+    float intensity = 2.5f;
     colour = texture(texture1, TextCoord) * vec4(ambientLight(intensity) + diffuseLight(intensity) + specularLight(intensity), 1.0); 
 }
