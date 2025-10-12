@@ -42,7 +42,8 @@ static const char *lightFShader = "Shaders/lightShader.frag";
 GLuint uniformModel = 0, uniformProjection = 0, uniformView = 0;
 
 // light Colour
-glm::vec3 lightColour = glm::vec3(1.0f, 0.75f, 0.4f); // Sunset warm tone
+glm::vec3 lightColour = glm::vec3(1.0f, 0.85f, 0.6f); // Soft sunset yellow
+                                                    
 
 // Light position
 glm::vec3 lightPos = glm::vec3(-5.5f, -0.25f, -4.5f);
