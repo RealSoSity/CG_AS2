@@ -348,68 +348,6 @@ int main()
 
     glm::mat4 projection = glm::perspective(45.0f, (GLfloat)mainWindow.getBufferWidth() / (GLfloat)mainWindow.getBufferHeight(), 0.1f, 100.0f);
 
-    // unsigned int texture1;
-    // glGenTextures(1, &texture1);
-    // glBindTexture(GL_TEXTURE_2D, texture1);
-
-    // int width1, height1, nrChannels1;
-    // int width2, height2, nrChannels2;
-    // unsigned char *data1 = stbi_load("Textures/container.jpg", &width1, &height1, &nrChannels1, 0);
-    // unsigned char *data1 = stbi_load("Textures/cloth.jpg", &width1, &height1, &nrChannels1, 0); //lab9
-    // unsigned char *uvmap = stbi_load("Textures/uvmap.png", &width2, &height2, &nrChannels2, 0); //Lab10 (uvmap.png texture)
-    // unsigned char *sea = stbi_load("Textures/Sand_baseColor.jpeg", &width1, &height1, &nrChannels1, 0);
-    // unsigned char *sand = stbi_load("Textures/material_baseColor.png", &width2, &height2, &nrChannels2, 0);
-
-    // std::string texPath[2] = {"Textures/material_baseColor.png", "Textures/Sand_baseColor.jpeg"};
-
-    // if(!sea){
-    //     std::cout << "Failed to load texture " << stbi_failure_reason() << "\n";
-    // }else{
-    //     //Handle 1/3/4 channel images correctly
-    //     GLenum format = GL_RGB;
-    //     if(nrChannels1 == 1) format = GL_RED;
-    //     else if(nrChannels1 == 3) format = GL_RGB;
-    //     else if(nrChannels1 == 4) format = GL_RGBA;
-
-    //     //Avoid row-alignment issues for non-4 byte widths
-    //     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    //     glTexImage2D(GL_TEXTURE_2D, 0, format, width1, height1, 0, format, GL_UNSIGNED_BYTE, sea);
-    //     glGenerateMipmap(GL_TEXTURE_2D);
-    //     stbi_image_free(sea);
-    // }
-    // if(!sand){
-    //     std::cout << "Failed to load texture " << stbi_failure_reason() << "\n";
-    // }else{
-    //     //Handle 1/3/4 channel images correctly
-    //     GLenum format = GL_RGB;
-    //     if(nrChannels2 == 1) format = GL_RED;
-    //     else if(nrChannels2 == 3) format = GL_RGB;
-    //     else if(nrChannels2 == 4) format = GL_RGBA;
-
-    //     //Avoid row-alignment issues for non-4 byte widths
-    //     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    //     glTexImage2D(GL_TEXTURE_2D, 0, format, width2, height2, 0, format, GL_UNSIGNED_BYTE, sand);
-    //     glGenerateMipmap(GL_TEXTURE_2D);
-    //     stbi_image_free(sand);
-    // }
-    // if(!uvmap){
-    //     std::cout << "Failed to load texture" << stbi_failure_reason() << "\n";
-    // }else{
-    //     //Handle 1/3/4 channel images correctly
-    //     GLenum format = GL_RGB;
-    //     if(nrChannels2 == 1) format = GL_RED;
-    //     else if(nrChannels2 == 3) format = GL_RGB;
-    //     else if(nrChannels2 == 4) format = GL_RGBA;
-
-    //     //Avoid row-alignment issues for non-4-byte widths
-    //     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    //     // glTexImage2D(GL_TEXTURE_2D, 0, format, width1, height1, 0, format, GL_UNSIGNED_BYTE, data1);
-    //     glTexImage2D(GL_TEXTURE_2D, 0, format,width2,height2, 0, format, GL_UNSIGNED_BYTE, uvmap);
-    //     glGenerateMipmap(GL_TEXTURE_2D);
-    //     stbi_image_free(uvmap);
-    // }
-
     // Loop until window closed
     while (!mainWindow.getShouldClose())
     {
@@ -465,19 +403,6 @@ int main()
         cameraRotateMat[2] = glm::vec4(cameraRight.z, cameraUp.z, -cameraDirection.z, 0.0f);
         // view = cameraRotateMat * cameraPosMat;
         view = glm::lookAt(cameraPos, cameraPos + cameraDirection, cameraUp);
-
-        // glm::vec3 pyramidPositions[] =
-        //     {
-        //         glm::vec3(0.0f, 0.0f, -2.5f),
-        //         glm::vec3(2.0f, 5.0f, -15.0f),
-        //         glm::vec3(-1.5f, -2.2f, -2.5f),
-        //         glm::vec3(-3.8f, -2.0f, -12.3f),
-        //         glm::vec3(2.4f, -0.4f, -3.5f),
-        //         glm::vec3(-1.7f, 3.0f, -7.5f),
-        //         glm::vec3(1.3f, -2.0f, -2.5f),
-        //         glm::vec3(1.5f, 2.0f, -2.5f),
-        //         glm::vec3(1.5f, 0.2f, -1.5f),
-        //         glm::vec3(-1.3f, 1.0f, -1.5f)};
 
         // draw here
         shaderList[0]->UseShader();
